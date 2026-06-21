@@ -108,3 +108,29 @@
   background-color: $color-bg-hover;
   color: $color-text-tertiary;
 }
+
+.cardHiatus {
+  opacity: 0.85;
+  background-color: rgba(250, 248, 255);
+}
+
+.coverHiatus {
+  opacity: 0.7;
+}
+
+.titleHiatus {
+  color: $color-text-secondary;
+}
+
+.textHiatus {
+  color: $color-text-tertiary;
+}
+
+.hiatusNotice {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  font-weight: $font-weight-medium;
+  padding: $spacing-xs $spacing-sm;
+  background-color: rgba(255, 169, 64, 0.12);
+  border-radius: $radius-sm;
+}

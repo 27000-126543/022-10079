@@ -23,11 +23,15 @@ const FILTERS: Array<{ key: FilterType; label: string }> = [
 
 const TodayPage: React.FC = () => {
   const [filter, setFilter] = useState<FilterType>('all')
+  const [refreshKey, setRefreshKey] = useState(0)
   const getTodayComics = useComicStore((state) => state.getTodayComics)
   const markAsRead = useComicStore((state) => state.markAsRead)
+  const hydrate = useComicStore((state) => state.hydrate)
   const todayComics = getTodayComics()
 
   useDidShow(() => {
+    hydrate()
+    setRefreshKey((k) => k + 1)
     console.log('[Today] Page showed, today comics count:', todayComics.length)
   })
 

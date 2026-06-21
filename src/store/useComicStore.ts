@@ -1,13 +1,68 @@
 import { create } from 'zustand'
-import type { Comic, HiatusRecord, Weekday, UpdateType, TodayComic, Platform } from '@/types/comic'
+import Taro from '@tarojs/taro'
+import type {
+  Comic,
+  HiatusRecord,
+  Weekday,
+  UpdateType,
+  TodayComic,
+  ComicWithHiatusStatus
+} from '@/types/comic'
 import { mockComics } from '@/data/mockComics'
-import { generateId, getCurrentWeekday, getWeekKey, addWeeks, isSameWeek } from '@/utils/date'
+import {
+  generateId,
+  getCurrentWeekday,
+  getWeekKey,
+  getHiatusStatus,
+  isComicOnHiatusByDate
+} from '@/utils/date'
+import dayjs from 'dayjs'
 
-interface ComicState {
+const STORAGE_KEY = 'comic_tracker_data_v1'
+
+interface PersistedState {
   comics: Comic[]
-  readRecords: Record<string, boolean>
+  readRecords: Record<string, string>
   nextUpdateTypes: Record<string, UpdateType>
+}
 
+const loadFromStorage = (): PersistedState | null => {
+  try {
+    const data = Taro.getStorageSync(STORAGE_KEY)
+    if (data) {
+      return JSON.parse(data) as PersistedState
+    }
+  } catch (e) {
+    console.error('[Store] Failed to load from storage:', e)
+  }
+  return null
+}
+
+const saveToStorage = (state: PersistedState) => {
+  try {
+    Taro.setStorageSync(STORAGE_KEY, JSON.stringify(state))
+    console.log('[Store] Saved to storage, comics:', state.comics.length)
+  } catch (e) {
+    console.error('[Store] Failed to save to storage:', e)
+  }
+}
+
+const getInitialState = (): PersistedState => {
+  const persisted = loadFromStorage()
+  if (persisted && persisted.comics && persisted.comics.length > 0) {
+    console.log('[Store] Loaded from storage, comics count:', persisted.comics.length)
+    return persisted
+  }
+  console.log('[Store] No persisted data, using mock data')
+  return {
+    comics: mockComics,
+    readRecords: {},
+    nextUpdateTypes: {}
+  }
+}
+
+interface ComicState extends PersistedState {
+  hydrate: () => void
   addComic: (data: Omit<Comic, 'id' | 'createdAt' | 'hiatalRecords' | 'isFavorite'>) => void
   updateComic: (id: string, data: Partial<Comic>) => void
   deleteComic: (id: string) => void
@@ -15,17 +70,25 @@ interface ComicState {
   unmarkAsRead: (comicId: string) => void
   setNextUpdateType: (comicId: string, type: UpdateType) => void
   addHiatus: (comicId: string, weeksCount: number, reason?: string) => void
-  getComicsByWeekday: (weekday: Weekday) => Comic[]
+  getComicsByWeekday: (weekday: Weekday, targetDate?: dayjs.Dayjs) => ComicWithHiatusStatus[]
   getTodayComics: () => TodayComic[]
   getComicById: (id: string) => Comic | undefined
   toggleFavorite: (id: string) => void
   updateCurrentChapter: (id: string, chapter: number) => void
+  isComicReadThisWeek: (comicId: string) => boolean
 }
 
+const initialState = getInitialState()
+
 export const useComicStore = create<ComicState>((set, get) => ({
-  comics: mockComics,
-  readRecords: {},
-  nextUpdateTypes: {},
+  ...initialState,
+
+  hydrate: () => {
+    const persisted = loadFromStorage()
+    if (persisted) {
+      set(persisted)
+    }
+  },
 
   addComic: (data) => {
     const newComic: Comic = {
@@ -35,27 +98,72 @@ export const useComicStore = create<ComicState>((set, get) => ({
       hiatalRecords: [],
       isFavorite: false
     }
-    set((state) => ({
-      comics: [...state.comics, newComic]
-    }))
+    set((state) => {
+      const newState = {
+        ...state,
+        comics: [...state.comics, newComic]
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
+    console.log('[Store] Added comic:', newComic.title)
   },
 
   updateComic: (id, data) => {
-    set((state) => ({
-      comics: state.comics.map((c) => (c.id === id ? { ...c, ...data } : c))
-    }))
+    set((state) => {
+      const newState = {
+        ...state,
+        comics: state.comics.map((c) => (c.id === id ? { ...c, ...data } : c))
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
+    console.log('[Store] Updated comic:', id)
   },
 
   deleteComic: (id) => {
-    set((state) => ({
-      comics: state.comics.filter((c) => c.id !== id)
-    }))
+    set((state) => {
+      const newReadRecords = { ...state.readRecords }
+      delete newReadRecords[id]
+      const newNextTypes = { ...state.nextUpdateTypes }
+      delete newNextTypes[id]
+      const newState = {
+        comics: state.comics.filter((c) => c.id !== id),
+        readRecords: newReadRecords,
+        nextUpdateTypes: newNextTypes
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
+    console.log('[Store] Deleted comic:', id)
   },
 
   markAsRead: (comicId) => {
-    set((state) => ({
-      readRecords: { ...state.readRecords, [comicId]: true }
-    }))
+    const currentWeek = getWeekKey()
+    set((state) => {
+      const newState = {
+        ...state,
+        readRecords: { ...state.readRecords, [comicId]: currentWeek }
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
     const comic = get().getComicById(comicId)
     if (comic) {
       get().updateComic(comicId, {
@@ -63,20 +171,43 @@ export const useComicStore = create<ComicState>((set, get) => ({
         lastReadAt: Date.now()
       })
     }
+    console.log('[Store] Marked as read this week:', comicId, currentWeek)
   },
 
   unmarkAsRead: (comicId) => {
     set((state) => {
       const newRecords = { ...state.readRecords }
       delete newRecords[comicId]
-      return { readRecords: newRecords }
+      const newState = { ...state, readRecords: newRecords }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
     })
   },
 
+  isComicReadThisWeek: (comicId) => {
+    const state = get()
+    const readWeek = state.readRecords[comicId]
+    const currentWeek = getWeekKey()
+    return readWeek === currentWeek
+  },
+
   setNextUpdateType: (comicId, type) => {
-    set((state) => ({
-      nextUpdateTypes: { ...state.nextUpdateTypes, [comicId]: type }
-    }))
+    set((state) => {
+      const newState = {
+        ...state,
+        nextUpdateTypes: { ...state.nextUpdateTypes, [comicId]: type }
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
   },
 
   addHiatus: (comicId, weeksCount, reason) => {
@@ -88,27 +219,36 @@ export const useComicStore = create<ComicState>((set, get) => ({
       reason,
       createdAt: Date.now()
     }
-    set((state) => ({
-      comics: state.comics.map((c) =>
-        c.id === comicId ? { ...c, hiatalRecords: [...c.hiatalRecords, record] } : c
-      )
-    }))
+    set((state) => {
+      const newState = {
+        ...state,
+        comics: state.comics.map((c) =>
+          c.id === comicId ? { ...c, hiatalRecords: [...c.hiatalRecords, record] } : c
+        )
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
+    console.log('[Store] Added hiatus for comic:', comicId, weeksCount, 'weeks')
   },
 
-  getComicsByWeekday: (weekday) => {
+  getComicsByWeekday: (weekday, targetDate) => {
     const state = get()
+    const date = targetDate || dayjs()
     return state.comics
-      .filter((c) => {
-        const currentWeek = getWeekKey()
-        const isOnHiatus = c.hiatalRecords.some((h) => {
-          for (let i = 0; i < h.weeksCount; i++) {
-            if (isSameWeek(currentWeek, addWeeks(h.startWeek, i))) {
-              return true
-            }
-          }
-          return false
-        })
-        return c.weekday === weekday && !isOnHiatus
+      .filter((c) => c.weekday === weekday)
+      .map((c) => {
+        const hiatusStatus = isComicOnHiatusByDate(c.hiatalRecords, c.weekday, date)
+        const { resumesTomorrow } = getHiatusStatus(c.hiatalRecords, c.weekday)
+        return {
+          ...c,
+          isOnHiatus: hiatusStatus,
+          resumesTomorrow
+        }
       })
       .sort((a, b) => a.updateTime.localeCompare(b.updateTime))
   },
@@ -116,32 +256,32 @@ export const useComicStore = create<ComicState>((set, get) => ({
   getTodayComics: () => {
     const state = get()
     const today = getCurrentWeekday()
-    const currentWeek = getWeekKey()
+    const todayDate = dayjs()
 
     return state.comics
       .filter((c) => c.weekday === today)
       .map((c) => {
-        const isOnHiatus = c.hiatalRecords.some((h) => {
-          for (let i = 0; i < h.weeksCount; i++) {
-            if (isSameWeek(currentWeek, addWeeks(h.startWeek, i))) {
-              return true
-            }
-          }
-          return false
-        })
+        const { isOnHiatus, resumesTomorrow } = getHiatusStatus(c.hiatalRecords, c.weekday)
 
         let updateType: UpdateType = state.nextUpdateTypes[c.id] || 'main'
         if (isOnHiatus) {
           updateType = 'hiatus'
         }
 
+        const isRead = get().isComicReadThisWeek(c.id) && !isOnHiatus
+
         return {
           ...c,
           updateType,
-          isRead: !!state.readRecords[c.id]
+          isRead,
+          isOnHiatus,
+          resumesTomorrow
         }
       })
-      .sort((a, b) => a.updateTime.localeCompare(b.updateTime))
+      .sort((a, b) => {
+        if (a.isOnHiatus !== b.isOnHiatus) return a.isOnHiatus ? 1 : -1
+        return a.updateTime.localeCompare(b.updateTime)
+      })
   },
 
   getComicById: (id) => {
@@ -149,14 +289,32 @@ export const useComicStore = create<ComicState>((set, get) => ({
   },
 
   toggleFavorite: (id) => {
-    set((state) => ({
-      comics: state.comics.map((c) => (c.id === id ? { ...c, isFavorite: !c.isFavorite } : c))
-    }))
+    set((state) => {
+      const newState = {
+        ...state,
+        comics: state.comics.map((c) => (c.id === id ? { ...c, isFavorite: !c.isFavorite } : c))
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
   },
 
   updateCurrentChapter: (id, chapter) => {
-    set((state) => ({
-      comics: state.comics.map((c) => (c.id === id ? { ...c, currentChapter: chapter } : c))
-    }))
+    set((state) => {
+      const newState = {
+        ...state,
+        comics: state.comics.map((c) => (c.id === id ? { ...c, currentChapter: chapter } : c))
+      }
+      saveToStorage({
+        comics: newState.comics,
+        readRecords: newState.readRecords,
+        nextUpdateTypes: newState.nextUpdateTypes
+      })
+      return newState
+    })
   }
 }))

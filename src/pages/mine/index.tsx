@@ -10,9 +10,12 @@ import { WEEKDAY_MAP } from '@/types/comic'
 const MinePage: React.FC = () => {
   const comics = useComicStore((state) => state.comics)
   const toggleFavorite = useComicStore((state) => state.toggleFavorite)
-  const getComicById = useComicStore((state) => state.getComicById)
+  const hydrate = useComicStore((state) => state.hydrate)
+  const [refreshKey, setRefreshKey] = React.useState(0)
 
   useDidShow(() => {
+    hydrate()
+    setRefreshKey((k) => k + 1)
     console.log('[Mine] Page showed, total comics:', comics.length)
   })
 

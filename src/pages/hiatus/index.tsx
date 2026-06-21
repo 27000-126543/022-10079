@@ -4,66 +4,59 @@ import Taro, { useDidShow } from '@tarojs/taro'
 import styles from './index.module.scss'
 import EmptyState from '@/components/EmptyState'
 import { useComicStore } from '@/store/useComicStore'
-import { getWeekKey, addWeeks, isSameWeek } from '@/utils/date'
+import { getHiatusStatus, formatDateByStr } from '@/utils/date'
+import dayjs from 'dayjs'
 
 interface HiatusItem {
   comicId: string
   comicTitle: string
   platform: string
   coverColor: string
-  startWeek: string
+  startDate: string
+  endDate: string
   weeksCount: number
   reason?: string
-  endWeek: string
   isCurrent: boolean
   resumesTomorrow: boolean
 }
 
 const HiatusPage: React.FC = () => {
   const comics = useComicStore((state) => state.comics)
+  const hydrate = useComicStore((state) => state.hydrate)
   const [refreshKey, setRefreshKey] = React.useState(0)
 
   useDidShow(() => {
+    hydrate()
     setRefreshKey((k) => k + 1)
   })
 
   const allHiatus = useMemo<HiatusItem[]>(() => {
-    const currentWeek = getWeekKey()
-    const tomorrowWeek = getWeekKey()
     const list: HiatusItem[] = []
 
     comics.forEach((comic) => {
       comic.hiatalRecords.forEach((record) => {
-        const endWeek = addWeeks(record.startWeek, record.weeksCount - 1)
-        const resumeWeek = addWeeks(record.startWeek, record.weeksCount)
-
-        let isCurrent = false
-        for (let i = 0; i < record.weeksCount; i++) {
-          if (isSameWeek(currentWeek, addWeeks(record.startWeek, i))) {
-            isCurrent = true
-            break
-          }
+        const hiatusInfo = getHiatusStatus([record], comic.weekday)
+        if (hiatusInfo.startDate && hiatusInfo.endDate) {
+          list.push({
+            comicId: comic.id,
+            comicTitle: comic.title,
+            platform: comic.platform,
+            coverColor: comic.coverColor,
+            startDate: hiatusInfo.startDate,
+            endDate: hiatusInfo.endDate,
+            weeksCount: record.weeksCount,
+            reason: record.reason,
+            isCurrent: hiatusInfo.isOnHiatus,
+            resumesTomorrow: hiatusInfo.resumesTomorrow
+          })
         }
-
-        list.push({
-          comicId: comic.id,
-          comicTitle: comic.title,
-          platform: comic.platform,
-          coverColor: comic.coverColor,
-          startWeek: record.startWeek,
-          weeksCount: record.weeksCount,
-          reason: record.reason,
-          endWeek,
-          isCurrent,
-          resumesTomorrow: isSameWeek(tomorrowWeek, resumeWeek)
-        })
       })
     })
 
     return list.sort((a, b) => {
       if (a.isCurrent && !b.isCurrent) return -1
       if (!a.isCurrent && b.isCurrent) return 1
-      return b.startWeek.localeCompare(a.startWeek)
+      return dayjs(b.startDate).valueOf() - dayjs(a.startDate).valueOf()
     })
   }, [comics, refreshKey])
 
@@ -114,7 +107,7 @@ const HiatusPage: React.FC = () => {
         ) : (
           allHiatus.map((item, index) => (
             <View
-              key={`${item.comicId}-${index}`}
+              key={`${item.comicId}-${index}-${refreshKey}`}
               className={styles.hiatusCard}
               onClick={() => handleCardClick(item.comicId)}
             >
@@ -132,16 +125,19 @@ const HiatusPage: React.FC = () => {
               <View className={styles.cardBody}>
                 <View className={styles.infoGrid}>
                   <View className={styles.infoItem}>
-                    <Text className={styles.label}>开始周</Text>
-                    <Text className={styles.value}>{item.startWeek}</Text>
+                    <Text className={styles.label}>开始日期</Text>
+                    <Text className={styles.value}>{formatDateByStr(item.startDate)}</Text>
                   </View>
                   <View className={styles.infoItem}>
-                    <Text className={styles.label}>结束周</Text>
-                    <Text className={styles.value}>{item.endWeek}</Text>
+                    <Text className={styles.label}>恢复日期</Text>
+                    <Text className={styles.value}>{formatDateByStr(dayjs(item.endDate).add(1, 'day').format('YYYY-MM-DD'))}</Text>
                   </View>
                   <View className={styles.infoItem}>
                     <Text className={styles.label}>状态</Text>
-                    <Text className={styles.value} style={{ color: item.isCurrent ? '#FFA940' : '#86909C' }}>
+                    <Text
+                      className={styles.value}
+                      style={{ color: item.isCurrent ? '#FFA940' : '#86909C' }}
+                    >
                       {item.isCurrent ? '休刊中' : '已结束'}
                     </Text>
                   </View>

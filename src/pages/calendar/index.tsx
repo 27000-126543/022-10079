@@ -13,12 +13,16 @@ import classnames from 'classnames'
 
 const CalendarPage: React.FC = () => {
   const [selectedDay, setSelectedDay] = useState<Weekday | null>(null)
+  const [refreshKey, setRefreshKey] = useState(0)
   const comics = useComicStore((state) => state.comics)
   const getComicsByWeekday = useComicStore((state) => state.getComicsByWeekday)
+  const hydrate = useComicStore((state) => state.hydrate)
   const weekDates = getWeekDates()
   const today = getCurrentWeekday()
 
   useDidShow(() => {
+    hydrate()
+    setRefreshKey((k) => k + 1)
     console.log('[Calendar] Page showed, comics count:', comics.length)
   })
 
@@ -52,13 +56,18 @@ const CalendarPage: React.FC = () => {
         <WeekCalendar onDaySelect={handleDaySelect} selectedDay={selectedDay || undefined} />
 
         {displayDays.map(({ weekday, isToday, date }) => {
-          const dayComics = getComicsByWeekday(weekday)
+          const dayComics = getComicsByWeekday(weekday, date)
+          const activeComics = dayComics.filter((c) => !c.isOnHiatus)
+          const hiatusComics = dayComics.filter((c) => c.isOnHiatus)
           return (
-            <View key={weekday} className={styles.daySection}>
+            <View key={`${weekday}-${refreshKey}`} className={styles.daySection}>
               <View className={classnames(styles.dayHeader, isToday && styles.todayHighlight)}>
                 <View className={styles.dayTitle}>
                   <Text className={styles.dayName}>{WEEKDAY_MAP[weekday]}</Text>
-                  <Text className={styles.dayCount}>{dayComics.length} 部更新</Text>
+                  <Text className={styles.dayCount}>
+                    {activeComics.length} 部更新
+                    {hiatusComics.length > 0 && ` / ${hiatusComics.length} 休刊`}
+                  </Text>
                 </View>
                 <Text className={styles.dateText}>{formatDate(date)}</Text>
               </View>

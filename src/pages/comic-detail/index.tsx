@@ -20,12 +20,14 @@ const ComicDetailPage: React.FC = () => {
   const setNextUpdateType = useComicStore((state) => state.setNextUpdateType)
   const addHiatus = useComicStore((state) => state.addHiatus)
   const nextUpdateTypes = useComicStore((state) => state.nextUpdateTypes)
+  const hydrate = useComicStore((state) => state.hydrate)
 
   const [refreshKey, setRefreshKey] = useState(0)
   const [hiatusWeeks, setHiatusWeeks] = useState(1)
   const [hiatusReason, setHiatusReason] = useState('')
 
   useDidShow(() => {
+    hydrate()
     setRefreshKey((k) => k + 1)
   })
 

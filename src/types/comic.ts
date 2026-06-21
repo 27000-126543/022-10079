@@ -32,6 +32,13 @@ export interface TodayComic extends Comic {
   updateType: UpdateType
   isRead: boolean
   chapterTitle?: string
+  isOnHiatus: boolean
+  resumesTomorrow: boolean
+}
+
+export interface ComicWithHiatusStatus extends Comic {
+  isOnHiatus: boolean
+  resumesTomorrow: boolean
 }
 
 export const WEEKDAY_MAP: Record<Weekday, string> = {
