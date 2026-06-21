@@ -1,0 +1,77 @@
+@use '@/styles/variables.scss' as *;
+
+.weekCalendar {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+
+  .weekLabel {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-white;
+  }
+
+  .todayLabel {
+    font-size: $font-size-sm;
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.daysRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.dayItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-sm;
+  border-radius: $radius-md;
+  min-width: 80rpx;
+  transition: all $transition-base;
+
+  &.active {
+    background-color: rgba(255, 255, 255, 0.2);
+
+    .dayName,
+    .dayDate,
+    .comicCount {
+      color: $color-text-white;
+    }
+  }
+}
+
+.dayName {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4rpx;
+}
+
+.dayDate {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 4rpx;
+}
+
+.todayDot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: $radius-round;
+  background-color: $color-secondary-pink;
+  margin-bottom: 4rpx;
+}
+
+.comicCount {
+  font-size: $font-size-xs;
+  color: rgba(255, 255, 255, 0.6);
+}

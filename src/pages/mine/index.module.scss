@@ -1,0 +1,220 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.container {
+  padding: $spacing-lg $page-padding;
+}
+
+.profileHeader {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+
+  .avatar {
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: $radius-round;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: $spacing-lg;
+    font-size: 56rpx;
+  }
+
+  .info {
+    flex: 1;
+
+    .nickname {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      margin-bottom: $spacing-xs;
+    }
+
+    .motto {
+      font-size: $font-size-sm;
+      opacity: 0.85;
+    }
+  }
+}
+
+.statsCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  justify-content: space-around;
+
+  .statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .num {
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+      color: $color-primary;
+    }
+
+    .label {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      margin-top: $spacing-xs;
+    }
+  }
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  padding-left: $spacing-xs;
+}
+
+.menuCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-lg;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+  transition: all $transition-base;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+
+  .icon {
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: $spacing-md;
+    font-size: 32rpx;
+  }
+
+  .iconPurple {
+    background-color: rgba(123, 92, 255, 0.12);
+  }
+
+  .iconPink {
+    background-color: rgba(255, 123, 172, 0.12);
+  }
+
+  .iconBlue {
+    background-color: rgba(92, 200, 255, 0.12);
+  }
+
+  .iconGreen {
+    background-color: rgba(82, 196, 26, 0.12);
+  }
+
+  .iconOrange {
+    background-color: rgba(255, 169, 64, 0.12);
+  }
+
+  .content {
+    flex: 1;
+
+    .title {
+      font-size: $font-size-md;
+      color: $color-text-primary;
+      font-weight: $font-weight-medium;
+    }
+
+    .desc {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      margin-top: 4rpx;
+    }
+  }
+
+  .arrow {
+    font-size: $font-size-md;
+    color: $color-text-tertiary;
+  }
+}
+
+.comicList {
+  display: flex;
+  flex-direction: column;
+}
+
+.comicItem {
+  display: flex;
+  align-items: center;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  .cover {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: $spacing-md;
+    flex-shrink: 0;
+
+    .coverText {
+      font-size: $font-size-md;
+      font-weight: $font-weight-bold;
+      color: $color-text-white;
+    }
+  }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+
+    .title {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      @include text-ellipsis;
+    }
+
+    .meta {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      margin-top: 4rpx;
+    }
+  }
+
+  .favorite {
+    font-size: 32rpx;
+    padding: $spacing-xs;
+  }
+}

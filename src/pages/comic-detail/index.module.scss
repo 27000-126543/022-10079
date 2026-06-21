@@ -1,0 +1,288 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.container {
+  padding: $spacing-lg $page-padding 200rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+  display: flex;
+  align-items: center;
+
+  .cover {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: $radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: $spacing-lg;
+    flex-shrink: 0;
+    background-color: rgba(255, 255, 255, 0.2);
+
+    .coverText {
+      font-size: 56rpx;
+      font-weight: $font-weight-bold;
+      color: $color-text-white;
+    }
+  }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+
+    .title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+      margin-bottom: $spacing-sm;
+      @include text-ellipsis;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-sm;
+    }
+
+    .tag {
+      padding: 4rpx 16rpx;
+      border-radius: $radius-sm;
+      background-color: rgba(255, 255, 255, 0.2);
+      font-size: $font-size-xs;
+    }
+
+    .chapterText {
+      font-size: $font-size-sm;
+      opacity: 0.9;
+    }
+  }
+
+  .favorite {
+    font-size: 48rpx;
+    padding: $spacing-sm;
+  }
+}
+
+.sectionCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .editLink {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-normal;
+  }
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .value {
+    font-size: $font-size-sm;
+    color: $color-text-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.updateTypeRow {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+  margin-top: $spacing-md;
+}
+
+.updateTypeItem {
+  @include button-reset;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-button;
+  background-color: $color-bg-page;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.active {
+    color: $color-text-white;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.hiatusForm {
+  margin-top: $spacing-lg;
+}
+
+.formLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.weeksRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.weekBtn {
+  @include button-reset;
+  flex: 1;
+  height: 72rpx;
+  border-radius: $radius-md;
+  background-color: $color-bg-page;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  transition: all $transition-base;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.reasonInput {
+  width: 100%;
+  min-height: 88rpx;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  box-sizing: border-box;
+  margin-bottom: $spacing-md;
+}
+
+.addHiatusBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  border-radius: $radius-button;
+  background-color: $color-warning;
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.hiatusList {
+  margin-top: $spacing-md;
+}
+
+.hiatusItem {
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-sm;
+
+  .hiatusHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+
+    .weeks {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $color-warning;
+    }
+
+    .week {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+
+  .reason {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc(#{$spacing-md} + env(safe-area-inset-bottom));
+  background-color: $color-bg-card;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.editBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background-color: $color-bg-hover;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.deleteBtn {
+  @include button-reset;
+  flex: 1;
+  height: $button-height-lg;
+  border-radius: $radius-button;
+  background-color: rgba(255, 92, 92, 0.1);
+  color: $color-error;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.8;
+  }
+}

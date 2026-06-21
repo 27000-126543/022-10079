@@ -1,0 +1,98 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 160rpx;
+}
+
+.container {
+  padding: $spacing-lg $page-padding;
+}
+
+.header {
+  margin-bottom: $spacing-lg;
+
+  .greeting {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-xs;
+  }
+
+  .subtitle {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+}
+
+.addBtn {
+  @include button-reset;
+  position: fixed;
+  right: $page-padding;
+  bottom: 120rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: 64rpx;
+  font-weight: $font-weight-light;
+  box-shadow: 0 8rpx 24rpx rgba(123, 92, 255, 0.4);
+  z-index: 99;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.92);
+    opacity: 0.9;
+  }
+}
+
+.daySection {
+  margin-bottom: $spacing-xl;
+}
+
+.dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+
+  .dayTitle {
+    display: flex;
+    align-items: center;
+
+    .dayName {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      margin-right: $spacing-sm;
+    }
+
+    .dayCount {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+    }
+  }
+
+  .dateText {
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+  }
+}
+
+.todayHighlight {
+  .dayName {
+    color: $color-primary;
+  }
+
+  .dayName::after {
+    content: '';
+    display: inline-block;
+    width: 12rpx;
+    height: 12rpx;
+    border-radius: $radius-round;
+    background-color: $color-primary;
+    margin-left: $spacing-xs;
+  }
+}

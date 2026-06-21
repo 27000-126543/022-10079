@@ -1,0 +1,110 @@
+@use '@/styles/variables.scss' as *;
+
+.comicCard {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.cover {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: $spacing-lg;
+
+  .coverText {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-text-white;
+  }
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+
+  .title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    @include text-ellipsis;
+    margin-right: $spacing-sm;
+  }
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.chapterRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .chapter {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .updateTime {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+}
+
+.readBadge {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: $radius-round;
+  background-color: $color-primary;
+  margin-left: $spacing-sm;
+}
+
+.actionBtn {
+  @include button-reset;
+  height: $button-height-sm;
+  min-width: 120rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.96);
+  }
+}
+
+.readBtn {
+  background-color: $color-bg-hover;
+  color: $color-text-tertiary;
+}

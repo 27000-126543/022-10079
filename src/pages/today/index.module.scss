@@ -1,0 +1,125 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.container {
+  padding: $spacing-lg $page-padding;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-secondary-pink 0%, $color-primary 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+
+  .dateText {
+    font-size: $font-size-sm;
+    opacity: 0.9;
+    margin-bottom: $spacing-xs;
+  }
+
+  .title {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-sm;
+  }
+
+  .stats {
+    display: flex;
+    gap: $spacing-lg;
+
+    .statItem {
+      .num {
+        font-size: $font-size-xl;
+        font-weight: $font-weight-bold;
+      }
+
+      .label {
+        font-size: $font-size-xs;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.filterBar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: $spacing-xs;
+}
+
+.filterItem {
+  @include button-reset;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-button;
+  background-color: $color-bg-card;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-base;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+  }
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.96);
+  }
+}
+
+.comicList {
+  display: flex;
+  flex-direction: column;
+}
+
+.batchBar {
+  position: fixed;
+  bottom: 100rpx;
+  left: $page-padding;
+  right: $page-padding;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  box-shadow: $shadow-float;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .info {
+    .count {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+
+    .hint {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+
+ .markAllBtn {
+    @include button-reset;
+    height: $button-height-sm;
+    padding: 0 $spacing-lg;
+    border-radius: $radius-button;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    color: $color-text-white;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+
+    &:active {
+      opacity: 0.9;
+      transform: scale(0.96);
+    }
+  }
+}

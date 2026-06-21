@@ -1,0 +1,182 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+}
+
+.container {
+  padding: $spacing-lg $page-padding;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-warning 0%, #FFB347 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl $spacing-lg;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+
+  .title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-xs;
+  }
+
+  .subtitle {
+    font-size: $font-size-sm;
+    opacity: 0.9;
+  }
+
+  .stats {
+    display: flex;
+    gap: $spacing-xl;
+    margin-top: $spacing-md;
+
+    .statItem {
+      .num {
+        font-size: $font-size-xxl;
+        font-weight: $font-weight-bold;
+      }
+
+      .label {
+        font-size: $font-size-xs;
+        opacity: 0.85;
+      }
+    }
+  }
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  padding-left: $spacing-xs;
+}
+
+.hiatusCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  .cover {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: $spacing-md;
+    flex-shrink: 0;
+
+    .coverText {
+      font-size: $font-size-md;
+      font-weight: $font-weight-bold;
+      color: $color-text-white;
+    }
+  }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+
+    .title {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+      @include text-ellipsis;
+    }
+
+    .platform {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      margin-top: 4rpx;
+    }
+  }
+
+  .weeksBadge {
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-sm;
+    background-color: rgba(255, 169, 64, 0.12);
+    color: $color-warning;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.cardBody {
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.infoGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+
+  .label {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-bottom: 4rpx;
+  }
+
+  .value {
+    font-size: $font-size-sm;
+    color: $color-text-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.reasonText {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: $line-height-normal;
+}
+
+.upcomingBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4rpx $spacing-sm;
+  border-radius: $radius-sm;
+  background-color: rgba(82, 196, 26, 0.12);
+  color: $color-success;
+  font-size: $font-size-xs;
+  margin-top: $spacing-sm;
+
+  &::before {
+    content: '';
+    width: 8rpx;
+    height: 8rpx;
+    border-radius: $radius-round;
+    background-color: $color-success;
+    margin-right: 8rpx;
+  }
+}
+
+.emptyHint {
+  text-align: center;
+  padding: $spacing-xl;
+}
