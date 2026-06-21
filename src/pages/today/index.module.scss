@@ -123,3 +123,160 @@
     }
   }
 }
+
+.weekProgressCard {
+  background: linear-gradient(135deg, $color-secondary-blue 0%, $color-primary-light 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  color: $color-text-white;
+  box-shadow: $shadow-card;
+}
+
+.weekProgressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  .title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+  }
+
+  .toggleBtn {
+    font-size: $font-size-sm;
+    opacity: 0.9;
+  }
+}
+
+.weekProgressStats {
+  display: flex;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-md;
+
+  .statItem {
+    .num {
+      font-size: $font-size-xxl;
+      font-weight: $font-weight-bold;
+    }
+
+    .label {
+      font-size: $font-size-xs;
+      opacity: 0.9;
+    }
+  }
+}
+
+.progressBarContainer {
+  margin-bottom: $spacing-md;
+}
+
+.progressBar {
+  width: 100%;
+  height: 16rpx;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: $radius-round;
+  overflow: hidden;
+
+  .progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, $color-success 0%, #4ade80 100%);
+    border-radius: $radius-round;
+    transition: width 0.5s ease;
+  }
+}
+
+.progressText {
+  font-size: $font-size-xs;
+  opacity: 0.9;
+  margin-top: $spacing-xs;
+  text-align: right;
+}
+
+.subFilterBar {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: $spacing-xs;
+}
+
+.subFilterItem {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-round;
+  background-color: $color-bg-card;
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  transition: all $transition-base;
+
+  &.active {
+    background-color: $color-primary-bg;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.unreadSection {
+  margin-top: $spacing-lg;
+
+  .sectionTitle {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+    display: flex;
+    align-items: center;
+
+    .count {
+      margin-left: $spacing-sm;
+      padding: 2rpx 12rpx;
+      background-color: $color-error-bg;
+      color: $color-error;
+      border-radius: $radius-round;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-normal;
+    }
+  }
+}
+
+.groupTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  margin-top: $spacing-md;
+  padding-left: $spacing-xs;
+  border-left: 6rpx solid $color-primary;
+}
+
+.readSection {
+  margin-top: $spacing-lg;
+
+  .sectionTitle {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+    display: flex;
+    align-items: center;
+
+    .count {
+      margin-left: $spacing-sm;
+      padding: 2rpx 12rpx;
+      background-color: $color-success-bg;
+      color: $color-success;
+      border-radius: $radius-round;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-normal;
+    }
+  }
+}
+

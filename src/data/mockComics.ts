@@ -1,5 +1,14 @@
-import type { Comic } from '@/types/comic'
+import type { Comic, ActivityLog } from '@/types/comic'
 import { generateId, getWeekKey } from '@/utils/date'
+
+const createActivityLog = (comicId: string, type: ActivityLog['type'], detail: string, chapter?: number): ActivityLog => ({
+  id: generateId(),
+  comicId,
+  type,
+  timestamp: Date.now() - Math.floor(Math.random() * 30 * 86400000),
+  detail,
+  chapter
+})
 
 export const mockComics: Comic[] = [
   {
@@ -13,6 +22,8 @@ export const mockComics: Comic[] = [
     lastReadAt: Date.now() - 86400000,
     isFavorite: true,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'weekly', weekday: 3 },
     coverColor: '#7B5CFF',
     createdAt: Date.now() - 30 * 86400000
   },
@@ -26,6 +37,8 @@ export const mockComics: Comic[] = [
     lastReadAt: Date.now() - 2 * 86400000,
     isFavorite: true,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'weekly', weekday: 1 },
     coverColor: '#FF7BAC',
     createdAt: Date.now() - 20 * 86400000
   },
@@ -38,6 +51,8 @@ export const mockComics: Comic[] = [
     currentChapter: 12,
     isFavorite: false,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'biweekly', weekday: 5, biweekOdd: true },
     coverColor: '#5CC8FF',
     createdAt: Date.now() - 15 * 86400000
   },
@@ -49,16 +64,9 @@ export const mockComics: Comic[] = [
     updateTime: '12:00',
     currentChapter: 1112,
     isFavorite: true,
-    hiatalRecords: [
-      {
-        id: generateId(),
-        comicId: '',
-        startWeek: getWeekKey(),
-        weeksCount: 1,
-        reason: '作者取材休刊',
-        createdAt: Date.now() - 86400000
-      }
-    ],
+    hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'weekly', weekday: 4 },
     coverColor: '#52C41A',
     createdAt: Date.now() - 60 * 86400000
   },
@@ -72,6 +80,8 @@ export const mockComics: Comic[] = [
     totalChapter: 139,
     isFavorite: false,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'monthly', monthDay: 15 },
     coverColor: '#FFA940',
     createdAt: Date.now() - 90 * 86400000
   },
@@ -84,6 +94,8 @@ export const mockComics: Comic[] = [
     currentChapter: 168,
     isFavorite: true,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'weekly', weekday: 2 },
     coverColor: '#FF5C5C',
     createdAt: Date.now() - 25 * 86400000
   },
@@ -96,6 +108,8 @@ export const mockComics: Comic[] = [
     currentChapter: 125,
     isFavorite: true,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'weekly', weekday: 7 },
     coverColor: '#13C2C2',
     createdAt: Date.now() - 10 * 86400000
   },
@@ -108,7 +122,22 @@ export const mockComics: Comic[] = [
     currentChapter: 155,
     isFavorite: false,
     hiatalRecords: [],
+    activityLogs: [],
+    schedule: { type: 'weekly', weekday: 3 },
     coverColor: '#722ED1',
     createdAt: Date.now() - 5 * 86400000
   }
 ]
+
+mockComics.forEach((comic) => {
+  const logs: ActivityLog[] = [
+    createActivityLog(comic.id, 'add', `开始追更《${comic.title}》`),
+    createActivityLog(comic.id, 'read', `看完第 ${comic.currentChapter - 2} 话`, comic.currentChapter - 2),
+    createActivityLog(comic.id, 'read', `看完第 ${comic.currentChapter - 1} 话`, comic.currentChapter - 1),
+    createActivityLog(comic.id, 'read', `看完第 ${comic.currentChapter} 话`, comic.currentChapter)
+  ]
+  if (comic.isFavorite) {
+    logs.push(createActivityLog(comic.id, 'favorite_on', '加入收藏'))
+  }
+  comic.activityLogs = logs.sort((a, b) => b.timestamp - a.timestamp)
+})

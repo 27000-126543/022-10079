@@ -1,15 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { View, Text, Input, Button } from '@tarojs/components'
 import Taro, { useRouter, useDidShow } from '@tarojs/taro'
 import classnames from 'classnames'
 import styles from './index.module.scss'
 import { useComicStore } from '@/store/useComicStore'
 import TagBadge from '@/components/TagBadge'
+import { formatDateTime, getScheduleDescription } from '@/utils/date'
 import {
   WEEKDAY_MAP,
   UPDATE_TYPE_MAP,
-  type UpdateType
+  ACTIVITY_TYPE_MAP,
+  type UpdateType,
+  type ActivityLog
 } from '@/types/comic'
+
+const TIMELINE_ICONS: Record<string, string> = {
+  add: '➕',
+  read: '✅',
+  chapter_change: '📖',
+  favorite_on: '❤️',
+  favorite_off: '💔',
+  hiatus: '⏸️',
+  resume: '▶️',
+  update_type: '🏷️',
+  edit: '✏️'
+}
 
 const ComicDetailPage: React.FC = () => {
   const router = useRouter()
@@ -19,6 +34,7 @@ const ComicDetailPage: React.FC = () => {
   const toggleFavorite = useComicStore((state) => state.toggleFavorite)
   const setNextUpdateType = useComicStore((state) => state.setNextUpdateType)
   const addHiatus = useComicStore((state) => state.addHiatus)
+  const getActivityLogs = useComicStore((state) => state.getActivityLogs)
   const nextUpdateTypes = useComicStore((state) => state.nextUpdateTypes)
   const hydrate = useComicStore((state) => state.hydrate)
 
@@ -33,6 +49,10 @@ const ComicDetailPage: React.FC = () => {
 
   const comic = comicId ? getComicById(comicId) : null
   const currentUpdateType = comicId ? nextUpdateTypes[comicId] || 'main' : 'main'
+  const activityLogs = useMemo<ActivityLog[]>(() => {
+    if (!comicId) return []
+    return getActivityLogs(comicId).sort((a, b) => b.timestamp - a.timestamp)
+  }, [comicId, getActivityLogs, refreshKey])
 
   if (!comic) {
     return (
@@ -90,6 +110,31 @@ const ComicDetailPage: React.FC = () => {
     setRefreshKey((k) => k + 1)
   }
 
+  const renderTimelineContent = (log: ActivityLog) => {
+    switch (log.type) {
+      case 'add':
+        return '添加了这部漫画'
+      case 'read':
+        return `标记第 ${log.chapter} 话已看`
+      case 'chapter_change':
+        return `${log.oldValue ? `第 ${log.oldValue} 话 → ` : ''}第 ${log.newValue} 话`
+      case 'favorite_on':
+        return '收藏了这部漫画'
+      case 'favorite_off':
+        return '取消了收藏'
+      case 'hiatus':
+        return `休刊 ${log.detail || ''}，预计跳过 ${(log.detail || '').match(/\d+/)?.[0] || '1'} 次更新`
+      case 'resume':
+        return '休刊结束，恢复更新'
+      case 'update_type':
+        return `更新类型：${log.oldValue} → ${log.newValue}`
+      case 'edit':
+        return log.detail || '修改了漫画信息'
+      default:
+        return log.detail || ''
+    }
+  }
+
   return (
     <View className={styles.page}>
       <View className={styles.container}>
@@ -101,7 +146,7 @@ const ComicDetailPage: React.FC = () => {
             <Text className={styles.title}>{comic.title}</Text>
             <View className={styles.meta}>
               <View className={styles.tag}>{comic.platform}</View>
-              <View className={styles.tag}>{WEEKDAY_MAP[comic.weekday]}</View>
+              <View className={styles.tag}>{getScheduleDescription(comic.schedule)}</View>
               <View className={styles.tag}>{comic.updateTime}</View>
             </View>
             <Text className={styles.chapterText}>
@@ -124,10 +169,12 @@ const ComicDetailPage: React.FC = () => {
             <Text className={styles.value}>{comic.platform}</Text>
           </View>
           <View className={styles.infoRow}>
+            <Text className={styles.label}>更新周期</Text>
+            <Text className={styles.value}>{getScheduleDescription(comic.schedule)}</Text>
+          </View>
+          <View className={styles.infoRow}>
             <Text className={styles.label}>更新时间</Text>
-            <Text className={styles.value}>
-              {WEEKDAY_MAP[comic.weekday]} {comic.updateTime}
-            </Text>
+            <Text className={styles.value}>{comic.updateTime}</Text>
           </View>
           <View className={styles.infoRow}>
             <Text className={styles.label}>当前进度</Text>
@@ -142,6 +189,32 @@ const ComicDetailPage: React.FC = () => {
               {new Date(comic.createdAt).toLocaleDateString()}
             </Text>
           </View>
+        </View>
+
+        <View className={styles.sectionCard}>
+          <View className={styles.sectionTitle}>
+            <Text>追更时间线</Text>
+          </View>
+          {activityLogs.length > 0 ? (
+            <View className={styles.timeline}>
+              {activityLogs.map((log) => (
+                <View key={log.id} className={classnames(styles.timelineItem, styles[log.type])}>
+                  <View className={styles.timelineHeader}>
+                    <Text className={styles.timelineType}>
+                      <Text className={styles.icon}>{TIMELINE_ICONS[log.type] || '📝'}</Text>
+                      {ACTIVITY_TYPE_MAP[log.type]}
+                    </Text>
+                    <Text className={styles.timelineTime}>{formatDateTime(log.timestamp)}</Text>
+                  </View>
+                  <Text className={styles.timelineContent}>{renderTimelineContent(log)}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View className={styles.emptyTimeline}>
+              暂无追更记录
+            </View>
+          )}
         </View>
 
         <View className={styles.sectionCard}>
@@ -176,7 +249,7 @@ const ComicDetailPage: React.FC = () => {
           </View>
 
           <View className={styles.hiatusForm}>
-            <Text className={styles.formLabel}>休刊周数：</Text>
+            <Text className={styles.formLabel}>休刊周数（跳过几次更新）：</Text>
             <View className={styles.weeksRow}>
               {[1, 2, 3, 4].map((w) => (
                 <Button
