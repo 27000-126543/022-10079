@@ -268,8 +268,8 @@ const AddComicPage: React.FC = () => {
             <Text className={styles.label}>
               连载周期
               <Text className={styles.labelHint}>
-              {SCHEDULE_TYPE_MAP[scheduleType]}
-            </Text>
+                {SCHEDULE_TYPE_MAP[scheduleType].label}
+              </Text>
             </Text>
             <View className={styles.scheduleTypeRow}>
               {SCHEDULE_TYPES.map((s) => (

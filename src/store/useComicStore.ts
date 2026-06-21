@@ -188,21 +188,47 @@ export const useComicStore = create<ComicState>((set, get) => ({
 
   updateComic: (id, data) => {
     set((state) => {
-      let updatedComics = state.comics.map((c) => (c.id === id ? { ...c, ...data } : c))
       const oldComic = state.comics.find((c) => c.id === id)
-      if (oldComic && (data.title || data.platform || data.weekday || data.updateTime)) {
+      let updatedComics = state.comics.map((c) => (c.id === id ? { ...c, ...data } : c))
+
+      if (oldComic) {
         const changes: string[] = []
-        if (data.title && data.title !== oldComic.title) changes.push(`标题: ${oldComic.title} → ${data.title}`)
-        if (data.platform && data.platform !== oldComic.platform) changes.push(`平台: ${oldComic.platform} → ${data.platform}`)
-        if (data.weekday && data.weekday !== oldComic.weekday) {
+
+        if (data.title !== undefined && data.title !== oldComic.title) {
+          changes.push(`标题: ${oldComic.title} → ${data.title}`)
+        }
+        if (data.platform !== undefined && data.platform !== oldComic.platform) {
+          changes.push(`平台: ${oldComic.platform} → ${data.platform}`)
+        }
+        if (data.schedule !== undefined) {
           const oldDesc = getScheduleDescription(oldComic.schedule)
-          const newDesc = data.schedule ? getScheduleDescription(data.schedule) : ''
-          changes.push(`更新: ${oldDesc} → ${newDesc}`)
+          const newDesc = getScheduleDescription(data.schedule)
+          if (oldDesc !== newDesc) {
+            changes.push(`更新周期: ${oldDesc} → ${newDesc}`)
+          }
+        }
+        if (data.updateTime !== undefined && data.updateTime !== oldComic.updateTime) {
+          changes.push(`更新时间: ${oldComic.updateTime} → ${data.updateTime}`)
         }
         if (changes.length > 0) {
           updatedComics = addActivityLog(updatedComics, id, 'edit', `编辑了 ${changes.join('、')}`)
         }
+
+        if (data.currentChapter !== undefined && data.currentChapter !== oldComic.currentChapter) {
+          updatedComics = addActivityLog(
+            updatedComics,
+            id,
+            'chapter_change',
+            `话数: ${oldComic.currentChapter} → ${data.currentChapter}`,
+            {
+              oldValue: String(oldComic.currentChapter),
+              newValue: String(data.currentChapter),
+              chapter: data.currentChapter
+            }
+          )
+        }
       }
+
       const newState = { ...state, comics: updatedComics }
       saveToStorage({
         comics: newState.comics,
@@ -355,10 +381,7 @@ export const useComicStore = create<ComicState>((set, get) => ({
     const date = targetDate || dayjs()
     return state.comics
       .filter((c) => {
-        const hasWeeklyMatch = c.schedule.type === 'weekly' || c.schedule.type === 'biweekly'
-          ? c.weekday === weekday
-          : isScheduledToUpdate(c.schedule, date)
-        return hasWeeklyMatch
+        return isScheduledToUpdate(c.schedule, date)
       })
       .map((c) => {
         const hiatusStatus = isComicOnHiatusByDate(c.hiatalRecords, c.weekday, date)
@@ -376,34 +399,41 @@ export const useComicStore = create<ComicState>((set, get) => ({
 
   getTodayComics: () => {
     const state = get()
-    const today = getCurrentWeekday()
     const todayDate = dayjs()
 
-    return state.comics
-      .filter((c) => isScheduledToUpdate(c.schedule, todayDate))
-      .map((c) => {
-        const { isOnHiatus, resumesTomorrow, resumeDate } = getHiatusStatus(c.hiatalRecords, c.weekday)
+    const todayUpdateIds = new Set<string>()
+    const result: ComicWithHiatusStatus[] = []
 
+    state.comics.forEach((c) => {
+      const scheduledToday = isScheduledToUpdate(c.schedule, todayDate)
+      const hiatusInfo = getHiatusStatus(c.hiatalRecords, c.weekday)
+      const { isOnHiatus, resumesTomorrow } = hiatusInfo
+
+      if (scheduledToday || resumesTomorrow) {
         let updateType: UpdateType = state.nextUpdateTypes[c.id] || 'main'
         if (isOnHiatus) {
           updateType = 'hiatus'
         }
 
-        const isRead = get().isComicReadThisWeek(c.id) && !isOnHiatus
+        const isRead = scheduledToday && get().isComicReadThisWeek(c.id) && !isOnHiatus
 
-        return {
+        todayUpdateIds.add(c.id)
+        result.push({
           ...c,
           updateType,
           isRead,
           isOnHiatus,
           resumesTomorrow,
-          scheduledDate: todayDate.format('YYYY-MM-DD')
-        }
-      })
-      .sort((a, b) => {
-        if (a.isOnHiatus !== b.isOnHiatus) return a.isOnHiatus ? 1 : -1
-        return a.updateTime.localeCompare(b.updateTime)
-      })
+          scheduledDate: scheduledToday ? todayDate.format('YYYY-MM-DD') : null
+        })
+      }
+    })
+
+    return result.sort((a, b) => {
+      if (a.isOnHiatus !== b.isOnHiatus) return a.isOnHiatus ? 1 : -1
+      if (a.resumesTomorrow !== b.resumesTomorrow) return a.resumesTomorrow ? -1 : 1
+      return a.updateTime.localeCompare(b.updateTime)
+    })
   },
 
   getWeeklyProgress: () => {

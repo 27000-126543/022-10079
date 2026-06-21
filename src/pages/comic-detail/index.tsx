@@ -111,27 +111,40 @@ const ComicDetailPage: React.FC = () => {
   }
 
   const renderTimelineContent = (log: ActivityLog) => {
-    switch (log.type) {
-      case 'add':
-        return '添加了这部漫画'
-      case 'read':
-        return `标记第 ${log.chapter} 话已看`
-      case 'chapter_change':
-        return `${log.oldValue ? `第 ${log.oldValue} 话 → ` : ''}第 ${log.newValue} 话`
-      case 'favorite_on':
-        return '收藏了这部漫画'
-      case 'favorite_off':
-        return '取消了收藏'
-      case 'hiatus':
-        return `休刊 ${log.detail || ''}，预计跳过 ${(log.detail || '').match(/\d+/)?.[0] || '1'} 次更新`
-      case 'resume':
-        return '休刊结束，恢复更新'
-      case 'update_type':
-        return `更新类型：${log.oldValue} → ${log.newValue}`
-      case 'edit':
-        return log.detail || '修改了漫画信息'
-      default:
-        return log.detail || ''
+    try {
+      switch (log.type) {
+        case 'add':
+          return '添加了这部漫画'
+        case 'read':
+          return `标记第 ${log.chapter ?? '?'} 话已看`
+        case 'chapter_change': {
+          const old = log.oldValue ? `第 ${log.oldValue} 话 → ` : ''
+          return `${old}第 ${log.newValue ?? '?'} 话`
+        }
+        case 'favorite_on':
+          return '收藏了这部漫画'
+        case 'favorite_off':
+          return '取消了收藏'
+        case 'hiatus': {
+          const detail = log.detail || ''
+          const match = detail.match(/\d+/)
+          const weeks = match ? match[0] : '1'
+          return `休刊${detail}，预计跳过 ${weeks} 次更新`
+        }
+        case 'resume':
+          return '休刊结束，恢复更新'
+        case 'update_type': {
+          const oldV = log.oldValue || '正篇'
+          const newV = log.newValue || '正篇'
+          return `更新类型：${oldV} → ${newV}`
+        }
+        case 'edit':
+          return log.detail || '修改了漫画信息'
+        default:
+          return log.detail || '执行了操作'
+      }
+    } catch (e) {
+      return log.detail || '操作记录'
     }
   }
 
@@ -197,18 +210,23 @@ const ComicDetailPage: React.FC = () => {
           </View>
           {activityLogs.length > 0 ? (
             <View className={styles.timeline}>
-              {activityLogs.map((log) => (
-                <View key={log.id} className={classnames(styles.timelineItem, styles[log.type])}>
-                  <View className={styles.timelineHeader}>
-                    <Text className={styles.timelineType}>
-                      <Text className={styles.icon}>{TIMELINE_ICONS[log.type] || '📝'}</Text>
-                      {ACTIVITY_TYPE_MAP[log.type]}
-                    </Text>
-                    <Text className={styles.timelineTime}>{formatDateTime(log.timestamp)}</Text>
+              {activityLogs.map((log) => {
+                const activityInfo = ACTIVITY_TYPE_MAP[log.type] || { label: '操作', emoji: '📝' }
+                const icon = TIMELINE_ICONS[log.type] || activityInfo.emoji || '📝'
+                const typeClass = styles[log.type] || ''
+                return (
+                  <View key={log.id} className={classnames(styles.timelineItem, typeClass)}>
+                    <View className={styles.timelineHeader}>
+                      <Text className={styles.timelineType}>
+                        <Text className={styles.icon}>{icon}</Text>
+                        {activityInfo.label}
+                      </Text>
+                      <Text className={styles.timelineTime}>{formatDateTime(log.timestamp)}</Text>
+                    </View>
+                    <Text className={styles.timelineContent}>{renderTimelineContent(log)}</Text>
                   </View>
-                  <Text className={styles.timelineContent}>{renderTimelineContent(log)}</Text>
-                </View>
-              ))}
+                )
+              })}
             </View>
           ) : (
             <View className={styles.emptyTimeline}>
